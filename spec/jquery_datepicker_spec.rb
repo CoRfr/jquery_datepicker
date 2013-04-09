@@ -7,7 +7,7 @@ require 'date'
 ActionView::Base.send(:include, JqueryDatepicker::DatepickerHelper)
 ActionView::Helpers::FormBuilder.send(:include,JqueryDatepicker::FormBuilder)
 
-current_value = Time.new(2002, 10, 31, 1, 2, 3, "+02:00")
+current_value = Time.new(2002, 10, 31, 14, 2, 3, "+02:00")
 current_value_date = Date.new(2002, 10, 31)
 
 describe JqueryDatepicker do
@@ -228,10 +228,18 @@ describe JqueryDatepicker do
       EOTEMPLATE
     end
 
-    let :datetimepicker_form_template_current do
+    let :datetimepicker_form_template_current_12 do
       <<-EOTEMPLATE
         <%= form_for(foo, :url => "fake") do |f| %>
-          <%= f.datetime_picker(:att_time, :dateFormat => "dd/mm/yy", :timeFormat => "hh:mm") %>
+          <%= f.datetime_picker(:att_time, :dateFormat => "dd/mm/yy", :timeFormat => "hh:mmtt") %>
+        <% end %>
+      EOTEMPLATE
+    end
+
+    let :datetimepicker_form_template_current_24 do
+      <<-EOTEMPLATE
+        <%= form_for(foo, :url => "fake") do |f| %>
+          <%= f.datetime_picker(:att_time, :dateFormat => "dd/mm/yy", :timeFormat => "HH:mm") %>
         <% end %>
       EOTEMPLATE
     end
@@ -259,8 +267,13 @@ describe JqueryDatepicker do
       rendered.should include( "value=\"#{current_value_date.strftime("%d/%m/%Y")}\"" )
     end
 
-    it "should handle current value for time" do
-      render :inline => datetimepicker_form_template_current,:locals => {:foo => foo}
+    it "should handle current value for time (12 hour + AM/PM)" do
+      render :inline => datetimepicker_form_template_current_12,:locals => {:foo => foo}
+      rendered.should include( "value=\"#{current_value.strftime("%d/%m/%Y %I:%M%P")}\"" )
+    end
+
+    it "should handle current value for time (24 hour)" do
+      render :inline => datetimepicker_form_template_current_24,:locals => {:foo => foo}
       rendered.should include( "value=\"#{current_value.strftime("%d/%m/%Y %H:%M")}\"" )
     end
 
