@@ -16,6 +16,17 @@ module JqueryDatepicker
         else
           tf_options[:value] = input_tag.format_date(tf_options[:value], dp_options[:dateFormat])
         end
+
+      elsif ( !tf_options[:value] ) && dp_options.has_key?(:dateFormat)
+        value = input_tag.value(input_tag.object)
+
+        if value
+          if timepicker && dp_options.has_key?(:timeFormat)
+            tf_options[:value] = input_tag.format_time(value, dp_options[:dateFormat], dp_options[:timeFormat])
+          else
+            tf_options[:value] = input_tag.format_date(value, dp_options[:dateFormat])
+          end
+        end
       end
 
       html = input_tag.to_input_field_tag("text", tf_options)
@@ -80,13 +91,29 @@ class JqueryDatepicker::InstanceTag < ActionView::Helpers::InstanceTag
 
   def format_date(tb_formatted, format)
     new_format = translate_format(format, 'date')
-    Date.parse(tb_formatted).strftime(new_format)
+
+    date =
+      if tb_formatted.is_a? Date
+        tb_formatted
+      else
+        Date.parse(tb_formatted)
+      end
+
+    date.strftime(new_format)
   end
 
   def format_time(tb_formatted, date_format, time_format)
     new_date_format = translate_format(date_format, 'date')
     new_time_format = translate_format(time_format, 'time')
-    Time.parse(tb_formatted).strftime("#{ new_date_format } #{ new_time_format }")
+
+    time =
+      if tb_formatted.is_a? Time or tb_formatted.is_a? DateTime
+        tb_formatted
+      else
+        Time.parse(tb_formatted)
+      end
+
+    time.strftime("#{ new_date_format } #{ new_time_format }")
   end
 
   # Method that translates the datepicker date formats, defined in (http://docs.jquery.com/UI/Datepicker/formatDate)

@@ -7,8 +7,8 @@ require 'date'
 ActionView::Base.send(:include, JqueryDatepicker::DatepickerHelper)
 ActionView::Helpers::FormBuilder.send(:include,JqueryDatepicker::FormBuilder)
 
-current_value = Time.now
-current_value_date = Date.current
+current_value = Time.new(2002, 10, 31, 1, 2, 3, "+02:00")
+current_value_date = Date.new(2002, 10, 31)
 
 describe JqueryDatepicker do
 
@@ -66,7 +66,7 @@ describe JqueryDatepicker do
 
     let :datepicker_input_dateFormat_template do
         <<-EOTEMPLATE
-          <%= datepicker_input(:foo, :att1, :dateFormat  => "yy-mm-dd", :minDate => -20, :maxDate => "+1M +10D", :value => "#{current_value.utc.to_s}") %>
+          <%= datepicker_input(:foo, :att1, :dateFormat  => "yy-mm-dd", :minDate => -20, :maxDate => "+1M +10D", :value => "#{current_value.to_s}") %>
         EOTEMPLATE
     end
 
@@ -90,7 +90,7 @@ describe JqueryDatepicker do
 
     let :datepicker_input_with_value_template do
         <<-EOTEMPLATE
-          <%= datepicker_input(:foo, :att1, :value => "#{current_value.utc.to_s}") %>
+          <%= datepicker_input(:foo, :att1, :value => "#{current_value.to_s}") %>
         EOTEMPLATE
     end
 
@@ -121,7 +121,7 @@ describe JqueryDatepicker do
     end
 
     let :valid_response_input_with_value do
-      "<input id=\"foo_att1\" name=\"foo[att1]\" size=\"30\" type=\"text\" value=\"#{current_value.utc.to_s}\" />"
+      "<input id=\"foo_att1\" name=\"foo[att1]\" size=\"30\" type=\"text\" value=\"#{current_value.to_s}\" />"
     end
 
     let :valid_response_input_with_value_formatted do
@@ -191,7 +191,7 @@ describe JqueryDatepicker do
   describe JqueryDatepicker::FormHelper, :type => :view do
 
     let :foo do
-      Foo.new
+      Foo.new(current_value_date, current_value)
     end
 
     let :datepicker_form_template do
@@ -220,7 +220,21 @@ describe JqueryDatepicker do
         EOTEMPLATE
     end
 
+    let :datepicker_form_template_current do
+      <<-EOTEMPLATE
+        <%= form_for(foo, :url => "fake") do |f| %>
+          <%= f.datepicker(:att_date, :dateFormat => "dd/mm/yy") %>
+        <% end %>
+      EOTEMPLATE
+    end
 
+    let :datetimepicker_form_template_current do
+      <<-EOTEMPLATE
+        <%= form_for(foo, :url => "fake") do |f| %>
+          <%= f.datetime_picker(:att_time, :dateFormat => "dd/mm/yy", :timeFormat => "hh:mm") %>
+        <% end %>
+      EOTEMPLATE
+    end
 
     it "should return a valid response when calling inside a form_for" do
       render :inline => datepicker_form_template , :locals => {:foo => foo}
@@ -238,6 +252,16 @@ describe JqueryDatepicker do
       render :inline => datepicker_nested_form_template,:locals  => {:foo => foo}
       rendered.should include(valid_nested_response_input)
       rendered.should include(valid_nested_response_javascript)
+    end
+
+    it "should handle current value for date" do
+      render :inline => datepicker_form_template_current,:locals => {:foo => foo}
+      rendered.should include( "value=\"#{current_value_date.strftime("%d/%m/%Y")}\"" )
+    end
+
+    it "should handle current value for time" do
+      render :inline => datetimepicker_form_template_current,:locals => {:foo => foo}
+      rendered.should include( "value=\"#{current_value.strftime("%d/%m/%Y %H:%M")}\"" )
     end
 
   end

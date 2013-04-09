@@ -69,6 +69,7 @@ Nested attributes are permitted as well:
 
 You can pass options as it would be a normal text_field, plus all the datepicker options available (http://jqueryui.com/demos/datepicker/#options)
 
+:q
     <%= datepicker_input(:foo, :att1, :minDate => -20, :maxDate => "+1M +10D", :tabindex => 70) %>
 
 == Use DateTime picker
@@ -87,7 +88,7 @@ Then you can use in your views:
 or
 
     <% form_for(@user) do |f| %>
-      <%= f.datetime_picker 'loged_in', :dateFormat => "yy-mm-dd" %>
+      <%= f.datetime_picker 'logged_in', :dateFormat => "yy-mm-dd" %>
       <%= f.submit 'Create' %>
     <% end %>
 
